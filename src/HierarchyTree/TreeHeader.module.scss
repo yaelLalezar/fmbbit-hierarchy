@@ -1,0 +1,30 @@
+.tree_header {
+  border-bottom: 1px solid lightgray;
+  direction: rtl;
+  display: flex;
+  gap: 16px; /* MUI `gap: 2` is 2 * 8px = 16px */
+
+  .column {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .header_text {
+      font-size: 0.8rem; /* adjust as needed */
+      color: gray;
+    }
+  }
+
+  .column_large {
+     flex: 2;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    .header_text {
+      font-size: 0.8rem; /* adjust as needed */
+      color: gray;
+    }
+  }
+}

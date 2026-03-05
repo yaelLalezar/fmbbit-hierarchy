@@ -18,7 +18,10 @@ export class FundsCenterNode {
     return this.path;
   }
 
-  public getHierarchy(node: HierarchyAddresses): HierarchyAddresses {
+  public getHierarchy(
+    node: HierarchyAddresses,
+    currentLevel: number,
+  ): HierarchyAddresses {
     const parents = this.path.slice(0, -1);
 
     let currentNode = node;
@@ -27,7 +30,9 @@ export class FundsCenterNode {
         value: parents[i],
         balance: node.balance,
         used: node.used,
+        budget: node.budget,
         children: [currentNode],
+        level: currentLevel + i,
       };
     }
 
@@ -240,6 +245,7 @@ export type HierarchyAddresses = {
   used?: string;
   budget?: string;
   children: HierarchyAddresses[];
+  level: number;
 };
 
 export function groupByKey(
@@ -279,6 +285,7 @@ export function buildHierarchyFromAddresses(
   addresses: BudgetAdresses[],
   groupingKeys: GroupingKey[] = groupingByOrder,
   selectedTreeData: FundsCenterNode[] = selectedTreeNodes,
+  currentLevel: number = 1,
 ): HierarchyAddresses[] {
   if (groupingKeys.length === 0 || addresses.length === 0) {
     return [];
@@ -294,6 +301,7 @@ export function buildHierarchyFromAddresses(
     const node: HierarchyAddresses = {
       value,
       children: [],
+      level: currentLevel,
     };
 
     const { totalBalance, totalUsed, totalBudget } =
@@ -313,12 +321,13 @@ export function buildHierarchyFromAddresses(
           groupedAddresses,
           remainingKeys,
           selectedTreeData,
+          currentLevel + 1,
         );
 
         const selectedNodePath = selectedNode ? selectedNode.getPath() : null;
 
         if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
-          const hierarchyNode = selectedNode.getHierarchy(node);
+          const hierarchyNode = selectedNode.getHierarchy(node, currentLevel);
           nodes.push(hierarchyNode);
         } else {
           nodes.push(node);
@@ -328,6 +337,7 @@ export function buildHierarchyFromAddresses(
           groupedAddresses,
           remainingKeys,
           selectedTreeData,
+          currentLevel + 1,
         );
         nodes.push(node);
       }
@@ -374,163 +384,190 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
   return Array.from(merged.values());
 }
 
-export const hierarchyAddresses: HierarchyAddresses[] = [
-  {
-    value: "G2025333",
-    children: [
-      {
-        value: "FM123",
-        children: [
-          {
-            value: "FM90430",
-            children: [
-              {
-                value: "94343",
-                children: [{ value: "895015452.3", children: [] }],
-              },
-              {
-                value: "94003",
-                children: [{ value: "100140001.0", children: [] }],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "G2025892",
-    children: [
-      {
-        value: "FM567",
-        children: [
-          {
-            value: "95123",
-            children: [{ value: "895015452.3", children: [] }],
-          },
-        ],
-      },
-      {
-        value: "FM123",
-        children: [
-          {
-            value: "90430",
-            children: [
-              {
-                value: "94343",
-                children: [{ value: "123456789.2", children: [] }],
-              },
-              {
-                value: "94003",
-                children: [
-                  { value: "111111111.3", children: [] },
-                  { value: "100140001.0", children: [] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "G2025220",
-    children: [
-      {
-        value: "FM567",
-        children: [
-          {
-            value: "95123",
-            children: [{ value: "123456789.2", children: [] }],
-          },
-        ],
-      },
-      {
-        value: "FM123",
-        children: [
-          {
-            value: "90430",
-            children: [
-              {
-                value: "94343",
-                children: [
-                  { value: "123456789.2", children: [] },
-                  { value: "895015452.3", children: [] },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "G2025020",
-    children: [
-      {
-        value: "FM123",
-        children: [
-          {
-            value: "90430",
-            children: [
-              {
-                value: "94003",
-                children: [{ value: "895015452.3", children: [] }],
-              },
-            ],
-          },
-        ],
-      },
+// export const hierarchyAddresses: HierarchyAddresses[] = [
+//   {
+//     value: "G2025333",
+//     children: [
+//       {
+//         value: "FM123",
+//         children: [
+//           {
+//             value: "FM90430",
+//             children: [
+//               {
+//                 value: "94343",
+//                 children: [{ value: "895015452.3", children: [] }],
+//               },
+//               {
+//                 value: "94003",
+//                 children: [{ value: "100140001.0", children: [] }],
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     value: "G2025892",
+//     children: [
+//       {
+//         value: "FM567",
+//         children: [
+//           {
+//             value: "95123",
+//             children: [{ value: "895015452.3", children: [] }],
+//           },
+//         ],
+//       },
+//       {
+//         value: "FM123",
+//         children: [
+//           {
+//             value: "90430",
+//             children: [
+//               {
+//                 value: "94343",
+//                 children: [{ value: "123456789.2", children: [] }],
+//               },
+//               {
+//                 value: "94003",
+//                 children: [
+//                   { value: "111111111.3", children: [] },
+//                   { value: "100140001.0", children: [] },
+//                 ],
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     value: "G2025220",
+//     children: [
+//       {
+//         value: "FM567",
+//         children: [
+//           {
+//             value: "95123",
+//             children: [{ value: "123456789.2", children: [] }],
+//           },
+//         ],
+//       },
+//       {
+//         value: "FM123",
+//         children: [
+//           {
+//             value: "90430",
+//             children: [
+//               {
+//                 value: "94343",
+//                 children: [
+//                   { value: "123456789.2", children: [] },
+//                   { value: "895015452.3", children: [] },
+//                 ],
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     value: "G2025020",
+//     children: [
+//       {
+//         value: "FM123",
+//         children: [
+//           {
+//             value: "90430",
+//             children: [
+//               {
+//                 value: "94003",
+//                 children: [{ value: "895015452.3", children: [] }],
+//               },
+//             ],
+//           },
+//         ],
+//       },
 
-      { value: "95600", children: [{ value: "100140001.0", children: [] }] },
-    ],
-  },
-  {
-    value: "G2025041",
-    children: [
-      {
-        value: "FM123",
-        children: [
-          {
-            value: "90430",
-            children: [
-              {
-                value: "94343",
-                children: [{ value: "100140001.0", children: [] }],
-              },
-              {
-                value: "94003",
-                children: [{ value: "123456789.2", children: [] }],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        value: "FM567",
-        children: [
-          {
-            value: "95123",
-            children: [{ value: "100140001.0", children: [] }],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    value: "G2025150",
-    children: [
-      {
-        value: "FM567",
-        children: [
-          {
-            value: "95123",
-            children: [{ value: "895015452.3", children: [] }],
-          },
-        ],
-      },
+//       { value: "95600", children: [{ value: "100140001.0", children: [] }] },
+//     ],
+//   },
+//   {
+//     value: "G2025041",
+//     children: [
+//       {
+//         value: "FM123",
+//         children: [
+//           {
+//             value: "90430",
+//             children: [
+//               {
+//                 value: "94343",
+//                 children: [{ value: "100140001.0", children: [] }],
+//               },
+//               {
+//                 value: "94003",
+//                 children: [{ value: "123456789.2", children: [] }],
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//       {
+//         value: "FM567",
+//         children: [
+//           {
+//             value: "95123",
+//             children: [{ value: "100140001.0", children: [] }],
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   {
+//     value: "G2025150",
+//     children: [
+//       {
+//         value: "FM567",
+//         children: [
+//           {
+//             value: "95123",
+//             children: [{ value: "895015452.3", children: [] }],
+//           },
+//         ],
+//       },
 
-      { value: "95600", children: [{ value: "812153563.5", children: [] }] },
-    ],
+//       { value: "95600", children: [{ value: "812153563.5", children: [] }] },
+//     ],
+//   },
+// ];
+
+export const GROUPING_OPTIONS: { value: GroupingKey[]; label: string }[] = [
+  {
+    value: ["fundsCenter", "commitmentItem", "fund"],
+    label: "מרכז קרנות ← פריט התחייבות ← קרן",
+  },
+  {
+    value: ["fundsCenter", "fund", "commitmentItem"],
+    label: "מרכז קרנות ← קרן ← פריט התחייבות",
+  },
+  {
+    value: ["commitmentItem", "fundsCenter", "fund"],
+    label: "פריט התחייבות ← מרכז קרנות ← קרן",
+  },
+  {
+    value: ["commitmentItem", "fund", "fundsCenter"],
+    label: "פריט התחייבות ← קרן ← מרכז קרנות",
+  },
+  {
+    value: ["fund", "fundsCenter", "commitmentItem"],
+    label: "קרן ← מרכז קרנות ← פריט התחייבות",
+  },
+  {
+    value: ["fund", "commitmentItem", "fundsCenter"],
+    label: "קרן ← פריט התחייבות ← מרכז קרנות",
   },
 ];
