@@ -15,7 +15,13 @@ function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   return (
     <>
-      <Box className={styles.item}>
+      <Box
+        className={styles.item}
+        sx={{
+          backgroundColor:
+            currentAddress.children.length === 0 ? "#F2F2F2" : "none",
+        }}
+      >
         <Box
           className={styles.title}
           sx={{ paddingRight: `${currentAddress.level}rem` }}
@@ -52,11 +58,7 @@ function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
           </Box>
         </Box>
       </Box>
-      <Box
-        sx={{
-          backgroundColor: `rgba(0, 0, 0, ${currentAddress.level * 0.02})`,
-        }}
-      >
+      <Box>
         {currentAddress.children.length > 0 &&
           isExpanded &&
           currentAddress.children.map((child) => (
