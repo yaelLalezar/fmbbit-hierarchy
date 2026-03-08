@@ -12,10 +12,13 @@ function HierarchyTree({ addresses }: HierarchyTreeProps) {
 
     const [groupingKeysByOrder , setGroupingKeysByOrder] = useState<GroupingKey[]>(groupingByOrder)
 
-    const hierarchyAddresses = useMemo(() => {
-      return buildHierarchyFromAddresses(addresses, groupingKeysByOrder);
-    }, [addresses, groupingKeysByOrder]);
+    // const hierarchyAddresses = useMemo(() => {
+    //   return buildHierarchyFromAddresses(addresses, groupingKeysByOrder);
+    // }, [addresses, groupingKeysByOrder]);
 
+    const hierarchyAddresses = buildHierarchyFromAddresses(addresses, groupingKeysByOrder);
+
+    console.log(hierarchyAddresses);
   return (
     <Box sx={{width:'70vw'}}>
     <TreeContainer addressesHierarchy={hierarchyAddresses}/>

@@ -23,6 +23,7 @@ export class FundsCenterNode {
     currentLevel: number,
   ): HierarchyAddresses {
     const parents = this.path.slice(0, -1);
+    node.level = currentLevel + parents.length ;
 
     let currentNode = node;
     for (let i = parents.length - 1; i >= 0; i--) {
@@ -77,9 +78,9 @@ export const adresses: BudgetAdresses[] = [
     commitmentItem: "123456789.2",
     fund: "G2025041",
     fundsCenter: "94003",
-    balance: "1000000",
-    used: "10000",
-    budget: "10000000",
+    balance: "100550000",
+    used: "10020000",
+    budget: "1000000000",
   },
   {
     commitmentItem: "111111111.3",
@@ -311,37 +312,33 @@ export function buildHierarchyFromAddresses(
     node.used = totalUsed.toString();
     node.budget = totalBudget.toString();
 
-    if (remainingKeys.length > 0) {
-      if (currentKey === "fundsCenter") {
-        const selectedNode = selectedTreeData.find(
-          (item) => item.fundsCenter === value,
-        );
+    if (currentKey === "fundsCenter") {
+      const selectedNode = selectedTreeData.find(
+        (item) => item.fundsCenter === value,
+      );
 
-        node.children = buildHierarchyFromAddresses(
-          groupedAddresses,
-          remainingKeys,
-          selectedTreeData,
-          currentLevel + 1,
-        );
+      const selectedNodePath = selectedNode ? selectedNode.getPath() : [];
 
-        const selectedNodePath = selectedNode ? selectedNode.getPath() : null;
+      node.children = buildHierarchyFromAddresses(
+        groupedAddresses,
+        remainingKeys,
+        selectedTreeData,
+        currentLevel + selectedNodePath.length ,
+      );
 
-        if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
-          const hierarchyNode = selectedNode.getHierarchy(node, currentLevel);
-          nodes.push(hierarchyNode);
-        } else {
-          nodes.push(node);
-        }
+      if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
+        const hierarchyNode = selectedNode.getHierarchy(node, currentLevel);
+        nodes.push(hierarchyNode);
       } else {
-        node.children = buildHierarchyFromAddresses(
-          groupedAddresses,
-          remainingKeys,
-          selectedTreeData,
-          currentLevel + 1,
-        );
         nodes.push(node);
       }
     } else {
+      node.children = buildHierarchyFromAddresses(
+        groupedAddresses,
+        remainingKeys,
+        selectedTreeData,
+        currentLevel + 1,
+      );
       nodes.push(node);
     }
   });

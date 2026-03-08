@@ -5,9 +5,11 @@ import styles from './TreeHeader.module.scss';                  // import the st
 function TreeHeader() {
   return (
     <Box className={styles.tree_header}>
-      <Box className={styles.column_large}>
+      <Box  >
         <Typography className={styles.header_text}>שם המפקדה</Typography>
       </Box>
+      <Box className={styles.budget_titles}>
+
       <Box className={styles.column}>
         <Typography className={styles.header_text}>תקציב</Typography>
       </Box>
@@ -16,6 +18,7 @@ function TreeHeader() {
       </Box>
       <Box className={styles.column}>
         <Typography className={styles.header_text}>יתרה</Typography>
+      </Box>
       </Box>
     </Box>
   );

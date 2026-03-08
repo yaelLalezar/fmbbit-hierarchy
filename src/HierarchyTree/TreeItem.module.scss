@@ -1,63 +1,74 @@
 .item {
-  width: 100%;
   display: flex;
-  height: 4rem;
-  border-bottom: 1px solid black;
+  padding: 20px;
+  border-bottom: 1px solid #e7e7e7;
   direction: rtl;
-
+  justify-content: space-between;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.1);
   }
 
-  .item_content {
-    direction: rtl;
+  .title {
     display: flex;
-    gap: 10px; /* MUI `gap: 2` is 2 * 8px = 16px */
-    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+    .text {
+      font-size: 0.8rem;
+      color: black;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .iconButton {
+      margin-left: auto;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+
+      .icon {
+        width: 15px;
+        height: 15px;
+        transform: rotate(0);
+        transition: transform 0.1s;
+      }
+
+      .expanded {
+        width: 15px;
+        height: 15px;
+        transform: rotate(-90deg);
+        transition: transform 0.1s;
+      }
+
+      &:focus,
+      &:active,
+      &:focus-visible {
+        outline: none;
+        border: none;
+      }
+    }
+  }
+
+  .budget_details {
+    align-items: center;
+    display: flex;
+    gap: 7.5rem;
 
     .column {
-      flex: 1;
+      width: 7rem;
       display: flex;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
-
       .text {
-        font-size: 0.8rem; /* adjust as needed */
+        font-size: 0.8rem;
         color: black;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
-    }
-
-    .column_large {
-      flex: 2;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-
-      .text {
-        font-size: 0.8rem; /* adjust as needed */
-        color: black;
-      }
-    }
-  }
-
-  .title {
-    font-size: 1rem;
-  }
-
-  .iconButton {
-    .icon {
-      width: 15px;
-      height: 15px;
-      transform: rotate(0);
-      transition: transform 0.1s;
-    }
-
-    .expanded {
-      width: 15px;
-      height: 15px;
-      transform: rotate(-90deg);
-      transition: transform 0.1s;
     }
   }
 }
