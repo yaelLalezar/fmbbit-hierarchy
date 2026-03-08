@@ -16,20 +16,23 @@ function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
   return (
     <>
       <Box className={styles.item}>
-        <Box className={styles.title} sx={{paddingRight: `${currentAddress.level}rem`,}}>
-            {currentAddress.children.length > 0 && (
-              <IconButton
-                onClick={() => setIsExpanded((prev) => !prev)}
-                className={styles.iconButton}
-              >
-                <ChevronLeft
-                  className={isExpanded ? styles.expanded : styles.icon}
-                />
-              </IconButton>
-            )}
-            <Typography className={styles.text}>
-              {currentAddress.value}
-            </Typography>
+        <Box
+          className={styles.title}
+          sx={{ paddingRight: `${currentAddress.level}rem` }}
+        >
+          {currentAddress.children.length > 0 && (
+            <IconButton
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className={styles.iconButton}
+            >
+              <ChevronLeft
+                className={isExpanded ? styles.expanded : styles.icon}
+              />
+            </IconButton>
+          )}
+          <Typography className={styles.text}>
+            {currentAddress.value}
+          </Typography>
         </Box>
         <Box className={styles.budget_details}>
           <Box className={styles.column}>

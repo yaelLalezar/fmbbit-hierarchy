@@ -1,14 +1,4 @@
-import { useMemo, useState } from "react";
-import {
-  buildHierarchyFromAddresses,
-  GROUPING_OPTIONS,
-  groupingByOrder,
-  selectedTree,
-  treeToFundsCenterNodes,
-  type BudgetAdresses,
-  type GroupingKey,
-  type HierarchyAddresses,
-} from "../hardcodedData";
+import { type HierarchyAddresses } from "../hardcodedData";
 import TreeHeader from "./TreeHeader";
 import Box from "@mui/material/Box";
 import styles from "./TreeContainer.module.scss"; // import the stylesheet

@@ -3,59 +3,6 @@ export type SelectedTree = {
   children: SelectedTree[];
 };
 
-export class FundsCenterNode {
-  fundsCenter: string;
-  parent: FundsCenterNode | null;
-  path: string[];
-
-  constructor(fundsCenter: string, parent: FundsCenterNode | null = null) {
-    this.fundsCenter = fundsCenter;
-    this.parent = parent;
-    this.path = parent ? [...parent.path, fundsCenter] : [fundsCenter];
-  }
-
-  public getPath(): string[] {
-    return this.path;
-  }
-
-  public getHierarchy(
-    node: HierarchyAddresses,
-    currentLevel: number,
-  ): HierarchyAddresses {
-    const parents = this.path.slice(0, -1);
-    node.level = currentLevel + parents.length ;
-
-    let currentNode = node;
-    for (let i = parents.length - 1; i >= 0; i--) {
-      currentNode = {
-        value: parents[i],
-        balance: node.balance,
-        used: node.used,
-        budget: node.budget,
-        children: [currentNode],
-        level: currentLevel + i,
-      };
-    }
-
-    return currentNode;
-  }
-}
-
-export function treeToFundsCenterNodes(
-  tree: SelectedTree[],
-  parent: FundsCenterNode | null = null,
-): FundsCenterNode[] {
-  const result: FundsCenterNode[] = [];
-  for (const item of tree) {
-    const node = new FundsCenterNode(item.fundsCenter, parent);
-    result.push(node);
-    if (item.children && item.children.length) {
-      result.push(...treeToFundsCenterNodes(item.children, node));
-    }
-  }
-  return result;
-}
-
 export type BudgetAdresses = {
   commitmentItem: string;
   fund: string;
@@ -64,6 +11,17 @@ export type BudgetAdresses = {
   used: string;
   budget: string;
 };
+
+export type HierarchyAddresses = {
+  value: string;
+  balance?: string;
+  used?: string;
+  budget?: string;
+  children: HierarchyAddresses[];
+  level: number;
+};
+
+export type GroupingKey = "fund" | "fundsCenter" | "commitmentItem";
 
 export const adresses: BudgetAdresses[] = [
   {
@@ -230,24 +188,65 @@ export const selectedTree: SelectedTree[] = [
   { fundsCenter: "95600", children: [] },
 ];
 
-export const selectedTreeNodes = treeToFundsCenterNodes(selectedTree);
+export class FundsCenterNode {
+  fundsCenter: string;
+  parent: FundsCenterNode | null;
+  path: string[];
 
-export type GroupingKey = "fund" | "fundsCenter" | "commitmentItem";
+  constructor(fundsCenter: string, parent: FundsCenterNode | null = null) {
+    this.fundsCenter = fundsCenter;
+    this.parent = parent;
+    this.path = parent ? [...parent.path, fundsCenter] : [fundsCenter];
+  }
+
+  public getPath(): string[] {
+    return this.path;
+  }
+
+  public getHierarchy(
+    node: HierarchyAddresses,
+    currentLevel: number,
+  ): HierarchyAddresses {
+    const parents = this.path.slice(0, -1);
+    let currentNode = { ...node, level: currentLevel + parents.length };
+
+    for (let i = parents.length - 1; i >= 0; i--) {
+      currentNode = {
+        value: parents[i],
+        balance: node.balance,
+        used: node.used,
+        budget: node.budget,
+        children: [currentNode],
+        level: currentLevel + i,
+      };
+    }
+
+    return currentNode;
+  }
+}
+
+export function treeToFundsCenterNodes(
+  tree: SelectedTree[],
+  parent: FundsCenterNode | null = null,
+): FundsCenterNode[] {
+  const fundCenterNodes: FundsCenterNode[] = [];
+  for (const item of tree) {
+    const node = new FundsCenterNode(item.fundsCenter, parent);
+    fundCenterNodes.push(node);
+    if (item.children && item.children.length) {
+      fundCenterNodes.push(...treeToFundsCenterNodes(item.children, node));
+    }
+  }
+  return fundCenterNodes;
+}
+
+export const selectedTreeNodes = treeToFundsCenterNodes(selectedTree);
 
 export const groupingByOrder: GroupingKey[] = [
   "fund",
   "fundsCenter",
   "commitmentItem",
 ];
-
-export type HierarchyAddresses = {
-  value: string;
-  balance?: string;
-  used?: string;
-  budget?: string;
-  children: HierarchyAddresses[];
-  level: number;
-};
 
 export function groupByKey(
   addresses: BudgetAdresses[],
@@ -323,7 +322,7 @@ export function buildHierarchyFromAddresses(
         groupedAddresses,
         remainingKeys,
         selectedTreeData,
-        currentLevel + selectedNodePath.length ,
+        currentLevel + selectedNodePath.length,
       );
 
       if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
@@ -380,191 +379,3 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
 
   return Array.from(merged.values());
 }
-
-// export const hierarchyAddresses: HierarchyAddresses[] = [
-//   {
-//     value: "G2025333",
-//     children: [
-//       {
-//         value: "FM123",
-//         children: [
-//           {
-//             value: "FM90430",
-//             children: [
-//               {
-//                 value: "94343",
-//                 children: [{ value: "895015452.3", children: [] }],
-//               },
-//               {
-//                 value: "94003",
-//                 children: [{ value: "100140001.0", children: [] }],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     value: "G2025892",
-//     children: [
-//       {
-//         value: "FM567",
-//         children: [
-//           {
-//             value: "95123",
-//             children: [{ value: "895015452.3", children: [] }],
-//           },
-//         ],
-//       },
-//       {
-//         value: "FM123",
-//         children: [
-//           {
-//             value: "90430",
-//             children: [
-//               {
-//                 value: "94343",
-//                 children: [{ value: "123456789.2", children: [] }],
-//               },
-//               {
-//                 value: "94003",
-//                 children: [
-//                   { value: "111111111.3", children: [] },
-//                   { value: "100140001.0", children: [] },
-//                 ],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     value: "G2025220",
-//     children: [
-//       {
-//         value: "FM567",
-//         children: [
-//           {
-//             value: "95123",
-//             children: [{ value: "123456789.2", children: [] }],
-//           },
-//         ],
-//       },
-//       {
-//         value: "FM123",
-//         children: [
-//           {
-//             value: "90430",
-//             children: [
-//               {
-//                 value: "94343",
-//                 children: [
-//                   { value: "123456789.2", children: [] },
-//                   { value: "895015452.3", children: [] },
-//                 ],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     value: "G2025020",
-//     children: [
-//       {
-//         value: "FM123",
-//         children: [
-//           {
-//             value: "90430",
-//             children: [
-//               {
-//                 value: "94003",
-//                 children: [{ value: "895015452.3", children: [] }],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-
-//       { value: "95600", children: [{ value: "100140001.0", children: [] }] },
-//     ],
-//   },
-//   {
-//     value: "G2025041",
-//     children: [
-//       {
-//         value: "FM123",
-//         children: [
-//           {
-//             value: "90430",
-//             children: [
-//               {
-//                 value: "94343",
-//                 children: [{ value: "100140001.0", children: [] }],
-//               },
-//               {
-//                 value: "94003",
-//                 children: [{ value: "123456789.2", children: [] }],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//       {
-//         value: "FM567",
-//         children: [
-//           {
-//             value: "95123",
-//             children: [{ value: "100140001.0", children: [] }],
-//           },
-//         ],
-//       },
-//     ],
-//   },
-//   {
-//     value: "G2025150",
-//     children: [
-//       {
-//         value: "FM567",
-//         children: [
-//           {
-//             value: "95123",
-//             children: [{ value: "895015452.3", children: [] }],
-//           },
-//         ],
-//       },
-
-//       { value: "95600", children: [{ value: "812153563.5", children: [] }] },
-//     ],
-//   },
-// ];
-
-export const GROUPING_OPTIONS: { value: GroupingKey[]; label: string }[] = [
-  {
-    value: ["fundsCenter", "commitmentItem", "fund"],
-    label: "מרכז קרנות ← פריט התחייבות ← קרן",
-  },
-  {
-    value: ["fundsCenter", "fund", "commitmentItem"],
-    label: "מרכז קרנות ← קרן ← פריט התחייבות",
-  },
-  {
-    value: ["commitmentItem", "fundsCenter", "fund"],
-    label: "פריט התחייבות ← מרכז קרנות ← קרן",
-  },
-  {
-    value: ["commitmentItem", "fund", "fundsCenter"],
-    label: "פריט התחייבות ← קרן ← מרכז קרנות",
-  },
-  {
-    value: ["fund", "fundsCenter", "commitmentItem"],
-    label: "קרן ← מרכז קרנות ← פריט התחייבות",
-  },
-  {
-    value: ["fund", "commitmentItem", "fundsCenter"],
-    label: "קרן ← פריט התחייבות ← מרכז קרנות",
-  },
-];
