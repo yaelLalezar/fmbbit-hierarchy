@@ -14,6 +14,7 @@ export type BudgetAdresses = {
 
 export type HierarchyAddresses = {
   value: string;
+  key?: string;
   balance?: string;
   used?: string;
   budget?: string;
@@ -286,6 +287,7 @@ export function buildHierarchyFromAddresses(
   groupingKeys: GroupingKey[] = groupingByOrder,
   selectedTreeData: FundsCenterNode[] = selectedTreeNodes,
   currentLevel: number = 1,
+  withParents: boolean = true,
 ): HierarchyAddresses[] {
   if (groupingKeys.length === 0 || addresses.length === 0) {
     return [];
@@ -301,6 +303,7 @@ export function buildHierarchyFromAddresses(
     const node: HierarchyAddresses = {
       value,
       children: [],
+      key: currentKey,
       level: currentLevel,
     };
 
@@ -311,7 +314,7 @@ export function buildHierarchyFromAddresses(
     node.used = totalUsed.toString();
     node.budget = totalBudget.toString();
 
-    if (currentKey === "fundsCenter") {
+    if (currentKey === "fundsCenter" && withParents) {
       const selectedNode = selectedTreeData.find(
         (item) => item.fundsCenter === value,
       );
@@ -337,6 +340,7 @@ export function buildHierarchyFromAddresses(
         remainingKeys,
         selectedTreeData,
         currentLevel + 1,
+        withParents,
       );
       nodes.push(node);
     }

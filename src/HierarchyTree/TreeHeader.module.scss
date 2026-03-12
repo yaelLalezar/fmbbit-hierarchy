@@ -6,6 +6,34 @@
   align-items: center;
   padding-inline: 20px;
 
+      .iconButton {
+      margin-left: auto;
+      flex-shrink: 0;
+      padding: 0;
+      border: none;
+
+      .icon {
+        width: 15px;
+        height: 15px;
+        transform: rotate(0);
+        transition: transform 0.1s;
+      }
+
+      .expanded {
+        width: 15px;
+        height: 15px;
+        transform: rotate(-90deg);
+        transition: transform 0.1s;
+      }
+
+      &:focus,
+      &:active,
+      &:focus-visible {
+        outline: none;
+        border: none;
+      }
+    }
+
   .budget_titles {
     align-items: center;
     display: flex;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type HierarchyAddresses } from "../hardcodedData";
 import TreeHeader from "./TreeHeader";
 import Box from "@mui/material/Box";
@@ -9,10 +9,22 @@ import { ChevronLeft } from "lucide-react";
 interface TreeItemProps {
   allAddressesHierarchy: HierarchyAddresses[];
   currentAddress: HierarchyAddresses;
+  isAllExpanded?: boolean;
+  setIsAllExpended: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+function TreeItem({
+  allAddressesHierarchy,
+  currentAddress,
+  isAllExpanded,
+  setIsAllExpended,
+}: TreeItemProps) {
+  const [isExpanded, setIsExpanded] = useState(isAllExpanded);
+
+  useEffect(() => {
+    setIsExpanded(isAllExpanded);
+  }, [isAllExpanded]);
+
   return (
     <>
       <Box
@@ -28,7 +40,10 @@ function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
         >
           {currentAddress.children.length > 0 && (
             <IconButton
-              onClick={() => setIsExpanded((prev) => !prev)}
+              onClick={() => {
+                setIsExpanded((prev) => !prev);
+                // setIsAllExpended(false);
+              }}
               className={styles.iconButton}
             >
               <ChevronLeft
@@ -66,6 +81,8 @@ function TreeItem({ allAddressesHierarchy, currentAddress }: TreeItemProps) {
               <TreeItem
                 allAddressesHierarchy={allAddressesHierarchy}
                 currentAddress={child}
+                isAllExpanded={isAllExpanded}
+                setIsAllExpended={setIsAllExpended}
               />
             </Box>
           ))}

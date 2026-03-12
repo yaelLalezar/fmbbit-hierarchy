@@ -1,11 +1,24 @@
 import Box from "@mui/material/Box";
-import { Typography } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import styles from "./TreeHeader.module.scss"; // import the stylesheet
+import { ChevronLeft, ChevronsLeft } from "lucide-react";
 
-function TreeHeader() {
+
+interface TreeHeaderProps {
+    isAllExpended: boolean;
+    setIsAllExpended: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+function TreeHeader({ isAllExpended, setIsAllExpended }: TreeHeaderProps) {
   return (
     <Box className={styles.tree_header}>
-      <Box>
+      <Box sx={{display:'flex', alignItems: 'center'}}>
+        <IconButton
+          onClick={() => setIsAllExpended((prev) => !prev)}
+          className={styles.iconButton}
+        >
+          <ChevronsLeft className={ isAllExpended ? styles.expanded : styles.icon} />
+        </IconButton>
         <Typography className={styles.header_text}>שם המפקדה</Typography>
       </Box>
       <Box className={styles.budget_titles}>

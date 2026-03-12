@@ -8,6 +8,7 @@ import {
 
 import Box from "@mui/material/Box";
 import TreeContainer from "./TreeContainer";
+import { Button } from "@mui/material";
 
 interface HierarchyTreeProps {
   addresses: BudgetAdresses[];
@@ -16,13 +17,17 @@ interface HierarchyTreeProps {
 function HierarchyTree({ addresses }: HierarchyTreeProps) {
   const [groupingKeysByOrder, setGroupingKeysByOrder] =
     useState<GroupingKey[]>(groupingByOrder);
+  const [withParents, setWithParents] = useState<boolean>(true);
 
   const hierarchyAddresses = useMemo(() => {
-    return buildHierarchyFromAddresses(addresses, groupingKeysByOrder);
-  }, [addresses, groupingKeysByOrder]);
+    return buildHierarchyFromAddresses(addresses, groupingKeysByOrder, undefined, undefined, withParents);
+  }, [addresses, groupingKeysByOrder, withParents]);
 
   return (
     <Box sx={{ width: "70vw" }}>
+      <Button onClick={() => setWithParents(!withParents)}>
+        {withParents ? "Hide Parents" : "Show Parents"}
+      </Button>
       <TreeContainer addressesHierarchy={hierarchyAddresses} />
     </Box>
   );
