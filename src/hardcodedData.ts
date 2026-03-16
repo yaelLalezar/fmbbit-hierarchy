@@ -275,7 +275,7 @@ const getTotalBalanceAndUsed = (
     totalUsed += parseInt(address.used || "0");
     totalBudget += parseInt(address.budget || "0");
   });
-  
+
   return { totalBalance, totalUsed, totalBudget };
 };
 
@@ -358,17 +358,17 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
         ...node.children,
       ]);
 
-      if (node.balance !== undefined && existingNode.balance !== undefined) {
+      if (node.balance && existingNode.balance) {
         existingNode.balance = (
           parseInt(existingNode.balance) + parseInt(node.balance)
         ).toString();
       }
-      if (node.used !== undefined && existingNode.used !== undefined) {
+      if (node.used && existingNode.used) {
         existingNode.used = (
           parseInt(existingNode.used) + parseInt(node.used)
         ).toString();
       }
-      if (node.budget !== undefined && existingNode.budget !== undefined) {
+      if (node.budget && existingNode.budget) {
         existingNode.budget = (
           parseInt(existingNode.budget) + parseInt(node.budget)
         ).toString();
@@ -379,4 +379,3 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
   });
   return Array.from(merged.values());
 }
-
