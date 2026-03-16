@@ -266,19 +266,16 @@ export function groupByKey(
 const getTotalBalanceAndUsed = (
   groupedAddresses: BudgetAdresses[],
 ): { totalBalance: number; totalUsed: number; totalBudget: number } => {
-  const totalBalance = groupedAddresses.reduce(
-    (sum, address) => sum + parseInt(address.balance || "0"),
-    0,
-  );
-  const totalUsed = groupedAddresses.reduce(
-    (sum, address) => sum + parseInt(address.used || "0"),
-    0,
-  );
+  let totalBalance = 0;
+  let totalUsed = 0;
+  let totalBudget = 0;
 
-  const totalBudget = groupedAddresses.reduce(
-    (sum, address) => sum + parseInt(address.budget || "0"),
-    0,
-  );
+  groupedAddresses.forEach((address) => {
+    totalBalance += parseInt(address.balance || "0");
+    totalUsed += parseInt(address.used || "0");
+    totalBudget += parseInt(address.budget || "0");
+  });
+  
   return { totalBalance, totalUsed, totalBudget };
 };
 
@@ -354,32 +351,32 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
 
   nodes.forEach((node) => {
     if (merged.has(node.value)) {
-      const existing = merged.get(node.value)!;
+      const existingNode = merged.get(node.value)!;
 
-      existing.children = mergeNodesByValue([
-        ...existing.children,
+      existingNode.children = mergeNodesByValue([
+        ...existingNode.children,
         ...node.children,
       ]);
 
-      if (node.balance !== undefined && existing.balance !== undefined) {
-        existing.balance = (
-          parseInt(existing.balance) + parseInt(node.balance)
+      if (node.balance !== undefined && existingNode.balance !== undefined) {
+        existingNode.balance = (
+          parseInt(existingNode.balance) + parseInt(node.balance)
         ).toString();
       }
-      if (node.used !== undefined && existing.used !== undefined) {
-        existing.used = (
-          parseInt(existing.used) + parseInt(node.used)
+      if (node.used !== undefined && existingNode.used !== undefined) {
+        existingNode.used = (
+          parseInt(existingNode.used) + parseInt(node.used)
         ).toString();
       }
-      if (node.budget !== undefined && existing.budget !== undefined) {
-        existing.budget = (
-          parseInt(existing.budget) + parseInt(node.budget)
+      if (node.budget !== undefined && existingNode.budget !== undefined) {
+        existingNode.budget = (
+          parseInt(existingNode.budget) + parseInt(node.budget)
         ).toString();
       }
     } else {
       merged.set(node.value, node);
     }
   });
-
   return Array.from(merged.values());
 }
+

@@ -23,6 +23,8 @@ function HierarchyTree({ addresses }: HierarchyTreeProps) {
     return buildHierarchyFromAddresses(addresses, groupingKeysByOrder, undefined, undefined, withParents);
   }, [addresses, groupingKeysByOrder, withParents]);
 
+  console.log(hierarchyAddresses);
+
   return (
     <Box sx={{ width: "70vw" }}>
       <Button onClick={() => setWithParents(!withParents)}>
