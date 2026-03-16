@@ -279,6 +279,90 @@ const getTotalBalanceAndUsed = (
   return { totalBalance, totalUsed, totalBudget };
 };
 
+// export function buildHierarchyFromAddresses(
+//   addresses: BudgetAdresses[],
+//   groupingKeys: GroupingKey[] = groupingByOrder,
+//   selectedTreeData: FundsCenterNode[] = selectedTreeNodes,
+//   currentLevel: number = 1,
+//   withParents: boolean = true,
+// ): HierarchyAddresses[] {
+//   if (groupingKeys.length === 0 || addresses.length === 0) {
+//     return [];
+//   }
+//   const currentKey = groupingKeys[0];
+//   const remainingKeys = groupingKeys.slice(1);
+
+//   const grouped = groupByKey(addresses, currentKey);
+
+//   const nodes: HierarchyAddresses[] = [];
+
+//   Object.entries(grouped).forEach(([value, groupedAddresses]) => {
+//     const node: HierarchyAddresses = {
+//       value,
+//       children: [],
+//       key: currentKey,
+//       level: currentLevel,
+//     };
+
+//     const { totalBalance, totalUsed, totalBudget } =
+//       getTotalBalanceAndUsed(groupedAddresses);
+
+//     node.balance = totalBalance.toString();
+//     node.used = totalUsed.toString();
+//     node.budget = totalBudget.toString();
+
+//     if (currentKey === "fundsCenter" && withParents) {
+//       const selectedNode = selectedTreeData.find(
+//         (item) => item.fundsCenter === value,
+//       );
+
+//       const selectedNodePath = selectedNode ? selectedNode.getPath() : [];
+
+//       node.children = buildHierarchyFromAddresses(
+//         groupedAddresses,
+//         remainingKeys,
+//         selectedTreeData,
+//         currentLevel + selectedNodePath.length,
+//       );
+
+//       if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
+//         const hierarchyNode = selectedNode.getHierarchy(node, currentLevel);
+//         nodes.push(hierarchyNode);
+//       } else {
+//         nodes.push(node);
+//       }
+//     } else {
+//       node.children = buildHierarchyFromAddresses(
+//         groupedAddresses,
+//         remainingKeys,
+//         selectedTreeData,
+//         currentLevel + 1,
+//         withParents,
+//       );
+//       nodes.push(node);
+//     }
+//   });
+
+//   return mergeNodesByValue(nodes);
+// }
+
+function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
+  const map = new Map<string, HierarchyAddresses>();
+
+  for (const node of nodes) {
+    mergeIntoMap(map, node);
+  }
+
+  // ✅ Recursive call on children after all siblings are merged
+  for (const node of map.values()) {
+    if (node.children.length > 0) {
+      node.children = mergeNodesByValue(node.children);
+    }
+  }
+
+  return [...map.values()];
+}
+
 export function buildHierarchyFromAddresses(
   addresses: BudgetAdresses[],
   groupingKeys: GroupingKey[] = groupingByOrder,
@@ -286,51 +370,43 @@ export function buildHierarchyFromAddresses(
   currentLevel: number = 1,
   withParents: boolean = true,
 ): HierarchyAddresses[] {
-  if (groupingKeys.length === 0 || addresses.length === 0) {
-    return [];
-  }
+  if (groupingKeys.length === 0 || addresses.length === 0) return [];
+
   const currentKey = groupingKeys[0];
   const remainingKeys = groupingKeys.slice(1);
-
   const grouped = groupByKey(addresses, currentKey);
+  const merged = new Map<string, HierarchyAddresses>();
 
-  const nodes: HierarchyAddresses[] = [];
+  for (const [value, groupedAddresses] of Object.entries(grouped)) {
+    const { totalBalance, totalUsed, totalBudget } = getTotalBalanceAndUsed(groupedAddresses);
 
-  Object.entries(grouped).forEach(([value, groupedAddresses]) => {
     const node: HierarchyAddresses = {
       value,
-      children: [],
       key: currentKey,
       level: currentLevel,
+      balance: totalBalance.toString(),
+      used: totalUsed.toString(),
+      budget: totalBudget.toString(),
+      children: [],
     };
 
-    const { totalBalance, totalUsed, totalBudget } =
-      getTotalBalanceAndUsed(groupedAddresses);
-
-    node.balance = totalBalance.toString();
-    node.used = totalUsed.toString();
-    node.budget = totalBudget.toString();
-
     if (currentKey === "fundsCenter" && withParents) {
-      const selectedNode = selectedTreeData.find(
-        (item) => item.fundsCenter === value,
-      );
-
-      const selectedNodePath = selectedNode ? selectedNode.getPath() : [];
+      const selectedNode = selectedTreeData.find((item) => item.fundsCenter === value);
+      const pathLength = selectedNode?.getPath().length ?? 0;
 
       node.children = buildHierarchyFromAddresses(
         groupedAddresses,
         remainingKeys,
         selectedTreeData,
-        currentLevel + selectedNodePath.length,
+        currentLevel + pathLength,
       );
 
-      if (selectedNode && selectedNodePath && selectedNodePath.length > 0) {
-        const hierarchyNode = selectedNode.getHierarchy(node, currentLevel);
-        nodes.push(hierarchyNode);
-      } else {
-        nodes.push(node);
-      }
+      // ✅ Merge inline at getHierarchy call site
+      const hierarchyNode = selectedNode
+        ? selectedNode.getHierarchy(node, currentLevel)
+        : node;
+
+      mergeIntoMap(merged, hierarchyNode);
     } else {
       node.children = buildHierarchyFromAddresses(
         groupedAddresses,
@@ -339,24 +415,30 @@ export function buildHierarchyFromAddresses(
         currentLevel + 1,
         withParents,
       );
-      nodes.push(node);
-    }
-  });
 
-  return mergeNodesByValue(nodes);
+      mergeIntoMap(merged, node);
+    }
+  }
+
+    for (const node of merged.values()) {
+    if (node.children.length > 0) {
+      node.children = mergeNodesByValue(node.children);
+    }
+  }
+
+  return [...merged.values()];
 }
 
-function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
-  const merged = new Map<string, HierarchyAddresses>();
+function mergeIntoMap(
+  map: Map<string, HierarchyAddresses>,
+  node: HierarchyAddresses,
+): void {
+  const existingNode = map.get(node.value);
 
-  nodes.forEach((node) => {
-    if (merged.has(node.value)) {
-      const existingNode = merged.get(node.value)!;
-
-      existingNode.children = mergeNodesByValue([
-        ...existingNode.children,
-        ...node.children,
-      ]);
+  if (!existingNode) {
+    map.set(node.value, { ...node, children: [...node.children] });
+    return;
+  }
 
       if (node.balance && existingNode.balance) {
         existingNode.balance = (
@@ -373,9 +455,40 @@ function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
           parseInt(existingNode.budget) + parseInt(node.budget)
         ).toString();
       }
-    } else {
-      merged.set(node.value, node);
-    }
-  });
-  return Array.from(merged.values());
+
+  existingNode.children.push(...node.children);
 }
+
+// function mergeNodesByValue(nodes: HierarchyAddresses[]): HierarchyAddresses[] {
+//   const merged = new Map<string, HierarchyAddresses>();
+
+//   nodes.forEach((node) => {
+//     if (merged.has(node.value)) {
+//       const existingNode = merged.get(node.value)!;
+
+//       existingNode.children = mergeNodesByValue([
+//         ...existingNode.children,
+//         ...node.children,
+//       ]);
+
+//       if (node.balance && existingNode.balance) {
+//         existingNode.balance = (
+//           parseInt(existingNode.balance) + parseInt(node.balance)
+//         ).toString();
+//       }
+//       if (node.used && existingNode.used) {
+//         existingNode.used = (
+//           parseInt(existingNode.used) + parseInt(node.used)
+//         ).toString();
+//       }
+//       if (node.budget && existingNode.budget) {
+//         existingNode.budget = (
+//           parseInt(existingNode.budget) + parseInt(node.budget)
+//         ).toString();
+//       }
+//     } else {
+//       merged.set(node.value, node);
+//     }
+//   });
+//   return Array.from(merged.values());
+// }
